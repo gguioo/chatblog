@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151a33">
+<title>碎碎念 · Chat Blog Demo</title>
+<style>
+:root{
+  --bg1:#232a4d;--bg2:#121630;--bg3:#0b0e20;
+  --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.12);
+  --line:rgba(255,255,255,.08);--text:#eef0f8;--muted:#9aa0bd;
+  --bubble:#2a2f4b;--bubble2:#1c2038;--accent:#ff5a1f;
+  --r:28px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","MiSans","Noto Sans SC","Microsoft YaHei",sans-serif;
+  color:var(--text);background:var(--bg3);
+  background:radial-gradient(120% 70% at 50% 0%,var(--bg1) 0%,var(--bg2) 55%,var(--bg3) 100%) fixed;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+/* ---------- top bar ---------- */
+.top{position:fixed;top:0;left:0;right:0;z-index:30;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;
+  display:flex;align-items:center;gap:10px;justify-content:center;
+  background:linear-gradient(to bottom,rgba(18,22,48,.92) 55%,rgba(18,22,48,0));}
+.inner{width:100%;max-width:720px;display:flex;align-items:center;gap:10px}
+.circle{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line)}
+.avatar{background:var(--accent);border:0;font-weight:700;font-size:19px;letter-spacing:.5px}
+.tabs{flex:1;position:relative;height:56px;border-radius:999px;display:flex;padding:5px;
+  background:rgba(255,255,255,.06);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line)}
+.tabs .pill{position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 10px)/3);border-radius:999px;background:#f4f4f6;
+  transition:transform .45s cubic-bezier(.2,.9,.2,1.15);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.tabs button{position:relative;flex:1;font-size:17px;font-weight:600;color:var(--muted);transition:color .3s;z-index:1}
+.tabs button.on{color:#14172b}
+
+/* ---------- layout ---------- */
+main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px) 16px 140px}
+.view{display:none;animation:fade .45s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hello{padding:18px 6px 6px}
+.hello h1{font-size:30px;margin:0 0 8px;font-weight:700;letter-spacing:.5px}
+.hello p{margin:0;color:var(--muted);line-height:1.7;font-size:15px}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:34px 6px 14px}
+.sec h2{font-size:15px;margin:0;color:var(--muted);font-weight:600;letter-spacing:2px}
+.sec button{color:var(--muted);font-size:14px}
+
+/* ---------- fanned cards ---------- */
+.fan{position:relative;height:330px;margin:4px 0 10px}
+.card{position:absolute;width:62%;border-radius:24px;overflow:hidden;background:#111;box-shadow:0 18px 40px rgba(0,0,0,.45);
+  transition:transform .4s cubic-bezier(.2,.9,.2,1.1);cursor:pointer;border:1px solid rgba(255,255,255,.06)}
+.card .img{aspect-ratio:16/10;display:block;width:100%;object-fit:cover}
+.card .meta{padding:14px 18px 18px}
+.card .t{font-weight:700;font-size:17px;line-height:1.35}
+.card .s{color:#8f94ab;font-size:14px;margin-top:6px;display:flex;align-items:center;gap:6px}
+.fan .card:nth-child(1){left:0;top:70px;transform:rotate(-4deg);z-index:1}
+.fan .card:nth-child(2){left:20%;top:0;transform:rotate(2deg);z-index:3}
+.fan .card:nth-child(3){right:0;top:100px;transform:rotate(5deg);z-index:2}
+.fan .card:hover,.fan .card:active{transform:rotate(0) scale(1.03);z-index:5}
+
+/* ---------- chat ---------- */
+.chat{display:flex;flex-direction:column;gap:14px}
+.day{align-self:center;font-size:12px;color:var(--muted);padding:4px 12px;border-radius:99px;background:var(--glass);margin:10px 0 2px}
+.msg{max-width:84%;display:flex;flex-direction:column;gap:6px;animation:pop .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.ai{align-self:flex-start}
+.bubble{padding:16px 20px;border-radius:var(--r);font-size:17px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.me .bubble{background:var(--bubble);border-bottom-right-radius:10px}
+.ai .bubble{background:var(--bubble2);border-bottom-left-radius:10px;border:1px solid var(--line)}
+.pics{display:grid;gap:6px;border-radius:22px;overflow:hidden;max-width:100%}
+.pics.n1{grid-template-columns:1fr;width:min(320px,100%)}
+.pics.n2{grid-template-columns:1fr 1fr;width:min(360px,100%)}
+.pics.n3,.pics.n4{grid-template-columns:1fr 1fr;width:min(360px,100%)}
+.pics img{width:100%;height:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:zoom-in;background:#222}
+.pics.n1 img{aspect-ratio:4/3}
+.time{font-size:12px;color:var(--muted);padding:0 8px;display:flex;gap:10px}
+.time .del{color:#ff8a7a;display:none}
+.mine .time .del{display:inline}
+.linkcard{width:min(320px,100%);border-radius:22px;overflow:hidden;background:#111;cursor:pointer;border:1px solid rgba(255,255,255,.06)}
+.linkcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.linkcard div{padding:12px 16px 14px}
+.linkcard b{display:block;font-size:16px}
+.linkcard span{color:#8f94ab;font-size:13px}
+.typing{display:inline-flex;gap:5px;padding:18px 20px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-4px)}}
+
+/* ---------- long list ---------- */
+.list{display:grid;gap:18px}
+.row{display:flex;gap:16px;align-items:center;padding:12px;border-radius:26px;background:var(--glass);border:1px solid var(--line);cursor:pointer;transition:background .2s}
+.row:hover{background:var(--glass2)}
+.row img{width:108px;height:108px;border-radius:18px;object-fit:cover;flex:none}
+.row h3{margin:0 0 6px;font-size:18px;line-height:1.4}
+.row p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row small{display:block;color:#7c82a0;margin-top:8px;font-size:12px}
+
+/* ---------- reader ---------- */
+.reader{position:fixed;inset:0;z-index:50;background:var(--bg3);overflow-y:auto;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.2,1)}
+.reader.on{transform:none}
+.reader .hero{width:100%;aspect-ratio:16/9;max-height:52vh;object-fit:cover;display:block;-webkit-mask-image:linear-gradient(#000 60%,transparent)}
+.reader article{max-width:660px;margin:-40px auto 0;padding:0 22px 120px;position:relative}
+.reader h1{font-family:"Songti SC","Noto Serif SC","Source Han Serif SC",serif;font-size:32px;line-height:1.35;margin:0 0 12px}
+.reader .by{color:var(--muted);font-size:14px;margin-bottom:30px}
+.reader p{font-family:"Songti SC","Noto Serif SC","Source Han Serif SC",serif;font-size:18.5px;line-height:2;color:#dfe2ee;margin:0 0 1.3em;text-align:justify}
+.reader blockquote{margin:1.6em 0;padding:4px 0 4px 18px;border-left:3px solid var(--accent);color:#c9cde0;font-style:italic}
+.close{position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:16px;z-index:51}
+
+/* ---------- composer ---------- */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:14px 16px calc(env(safe-area-inset-bottom) + 16px);
+  background:linear-gradient(to top,rgba(11,14,32,.96) 50%,rgba(11,14,32,0));display:flex;justify-content:center}
+.composer{width:100%;max-width:720px;border-radius:34px;background:rgba(40,44,70,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--line);padding:8px 8px 8px 24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.thumbs{display:flex;gap:8px;padding:8px 0 4px;overflow-x:auto}
+.thumbs:empty{display:none}
+.thumbs div{position:relative;flex:none}
+.thumbs img{width:64px;height:64px;border-radius:14px;object-fit:cover;display:block}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#000c;font-size:13px;line-height:22px}
+.crow{display:flex;align-items:flex-end;gap:4px}
+textarea{flex:1;resize:none;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:18px;line-height:1.5;padding:12px 0;max-height:140px}
+textarea::placeholder{color:#8b90ac}
+.ic{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;flex:none;transition:background .2s,transform .2s}
+.ic:active{transform:scale(.9)}
+.send{background:#f4f4f6;color:#14172b}
+.hide{display:none!important}
+
+/* ---------- misc ---------- */
+.lightbox{position:fixed;inset:0;z-index:60;background:rgba(5,6,14,.92);display:none;place-items:center;padding:20px}
+.lightbox.on{display:grid}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:18px}
+.search{position:fixed;top:calc(env(safe-area-inset-top) + 82px);left:16px;right:16px;z-index:29;display:none;justify-content:center}
+.search.on{display:flex}
+.search input{width:100%;max-width:720px;height:50px;border-radius:99px;border:1px solid var(--line);background:rgba(40,44,70,.92);color:var(--text);padding:0 22px;font-size:16px;outline:0;backdrop-filter:blur(16px)}
+.sheet{position:fixed;top:calc(env(safe-area-inset-top) + 80px);right:16px;z-index:40;width:240px;border-radius:24px;background:rgba(36,40,66,.96);border:1px solid var(--line);padding:16px;display:none;backdrop-filter:blur(20px)}
+.sheet.on{display:block}
+.sheet b{display:block;font-size:17px}.sheet span{color:var(--muted);font-size:13px;display:block;margin:4px 0 12px;line-height:1.6}
+.sheet button{width:100%;padding:11px;border-radius:14px;background:var(--glass2);margin-top:6px;font-size:14px}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+@media (min-width:640px){.fan{height:400px}.card{width:52%}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="inner">
+  <button class="circle" id="btnSearch" aria-label="搜索"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg></button>
+  <nav class="tabs" id="tabs">
+    <span class="pill" id="pill"></span>
+    <button data-v="home" class="on">主页</button>
+    <button data-v="frag">碎片</button>
+    <button data-v="long">长文</button>
+  </nav>
+  <button class="circle avatar" id="btnMe">JY</button>
+</div></header>
+
+<div class="search" id="searchBox"><input id="q" placeholder="搜碎片和长文…" autocomplete="off"></div>
+<div class="sheet" id="sheet">
+  <b>JY 的碎碎念</b><span>这是一个 demo。你发的碎片只存在这台设备的浏览器里，别人看不到。</span>
+  <button id="btnClear">清空我发的碎片</button>
+</div>
+
+<main>
+  <section class="view on" id="v-home">
+    <div class="hello"><h1>晚上好，路过的人</h1><p>这里像一个聊天框。短的想法丢进「碎片」，慢慢写完的放进「长文」。</p></div>
+    <div class="sec"><h2>最近的长文</h2><button data-go="long">全部 →</button></div>
+    <div class="fan" id="fan"></div>
+    <div class="sec"><h2>刚冒出来的碎片</h2><button data-go="frag">全部 →</button></div>
+    <div class="chat" id="homeChat"></div>
+  </section>
+  <section class="view" id="v-frag"><div class="chat" id="fragChat"></div></section>
+  <section class="view" id="v-long"><div class="sec" style="margin-top:14px"><h2>长文</h2></div><div class="list" id="longList"></div></section>
+</main>
+
+<div class="dock" id="dock"><div class="composer">
+  <div class="thumbs" id="thumbs"></div>
+  <div class="crow">
+    <textarea id="input" rows="1" placeholder="写点碎片…"></textarea>
+    <button class="ic" id="btnAdd" aria-label="发图"><svg width="26" height="26" viewBox="0 0 24 24" stroke="#e8eaf4" stroke-width="2.2" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg></button>
+    <button class="ic" id="btnMic" aria-label="语音"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8eaf4" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/></svg></button>
+    <button class="ic send hide" id="btnSend" aria-label="发送"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14172b" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button>
+  </div>
+  <input type="file" id="file" accept="image/*" multiple hidden>
+</div></div>
+
+<div class="reader" id="reader"></div>
+<button class="circle close hide" id="btnClose" aria-label="关闭"><svg width="22" height="22" viewBox="0 0 24 24" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<div class="lightbox" id="lb"><img id="lbImg" alt=""></div>
+
+<script>
+/* ---------- inline illustrations (no external images) ---------- */
+const svg=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+const ART={
+ sea:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf8a"/><stop offset=".55" stop-color="#ff7a59"/><stop offset="1" stop-color="#5b3a7a"/></linearGradient></defs><rect width="800" height="500" fill="url(#a)"/><circle cx="400" cy="300" r="90" fill="#fff1c9"/><rect y="300" width="800" height="200" fill="#2d2a5c"/><g fill="#ffd9a0" opacity=".7"><rect x="330" y="320" width="140" height="6" rx="3"/><rect x="350" y="345" width="100" height="5" rx="3"/><rect x="370" y="368" width="60" height="4" rx="2"/></g><path d="M120 300 l40-70 l40 70z M150 300 l20-110 l20 110z" fill="#1d1a3d"/></svg>`),
+ map:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="#f3ead8"/><g fill="#d9c7a3"><path d="M90 120q80-60 170-20t120 90q-30 70-120 60t-170-130z"/><path d="M430 260q90-50 200 0t110 120q-80 60-190 30t-120-150z"/><path d="M520 80q50-20 90 10t-10 60q-60 10-80-70z"/></g><g stroke="#b5533c" stroke-width="3" fill="none" stroke-dasharray="10 9"><path d="M200 180q140 60 260 150t220 40"/></g><circle cx="200" cy="180" r="9" fill="#b5533c"/><circle cx="680" cy="370" r="9" fill="#b5533c"/><g stroke="#8a7b60" stroke-width="1" opacity=".35"><path d="M0 100h800M0 200h800M0 300h800M0 400h800M160 0v500M320 0v500M480 0v500M640 0v500"/></g></svg>`),
+ spice:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="#ffd400"/><g fill="#141414"><circle cx="230" cy="260" r="110"/><circle cx="420" cy="230" r="80"/><circle cx="580" cy="290" r="120"/></g><g fill="#ffd400"><circle cx="200" cy="230" r="16"/><circle cx="260" cy="290" r="12"/><circle cx="430" cy="210" r="10"/><circle cx="560" cy="270" r="18"/><circle cx="620" cy="320" r="11"/></g></svg>`),
+ sky:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="#bfe3f7"/><path d="M0 330q120-90 260-30t270 10 270-60v250H0z" fill="#e9f6fd"/><path d="M0 400q160-70 330-10t300 0 170-40v150H0z" fill="#fff"/><circle cx="620" cy="120" r="50" fill="#fff6c4"/></svg>`),
+ night:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><rect width="600" height="600" fill="#1a1f45"/><circle cx="420" cy="170" r="70" fill="#f6efd6"/><circle cx="445" cy="155" r="62" fill="#1a1f45"/><g fill="#fff">${Array.from({length:40},(_,i)=>`<circle cx="${(i*137)%600}" cy="${(i*71)%380}" r="${i%3?1.2:2.2}"/>`).join('')}</g><path d="M0 470l90-60 70 40 110-90 120 80 90-40 120 70v130H0z" fill="#0c1030"/></svg>`),
+ tea:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><rect width="600" height="600" fill="#f5efe6"/><ellipse cx="300" cy="420" rx="190" ry="40" fill="#e3d6c3"/><path d="M170 250h260v90q0 90-130 90t-130-90z" fill="#c8603c"/><path d="M430 280q70 0 60 50t-70 40" stroke="#c8603c" stroke-width="18" fill="none"/><g stroke="#b8a68c" stroke-width="6" fill="none" stroke-linecap="round"><path d="M250 210q-20-30 0-60t0-60"/><path d="M310 210q-20-30 0-60t0-60"/></g></svg>`),
+ street:svg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><rect width="600" height="600" fill="#e7ecef"/><g><rect x="40" y="160" width="160" height="380" fill="#7fb7a4"/><rect x="220" y="110" width="160" height="430" fill="#efb35b"/><rect x="400" y="190" width="160" height="350" fill="#d9776b"/></g><g fill="#fff" opacity=".85">${[0,1,2].map(c=>[0,1,2,3].map(r=>`<rect x="${70+c*180}" y="${220+r*75}" width="40" height="44" rx="20"/><rect x="${130+c*180}" y="${220+r*75}" width="40" height="44" rx="20"/>`).join('')).join('')}</g><rect y="540" width="600" height="60" fill="#5d636b"/></svg>`)
+};
+
+/* ---------- seed content ---------- */
+const LONGS=[
+ {id:'malacca',title:'马六甲的风，吹了六百年',date:'2026-10-09',img:ART.sea,min:6,
+  sum:'季风决定了船什么时候来、什么时候走，也决定了一座港口的命运。',
+  body:['每年十一月，东北季风从中国南海一路吹下来，帆船顺风南下；到了五月，西南季风又把印度洋的船送进海峡。马六甲恰好卡在两股风的交界，船到了这里，就得停下来等风。','等风的几个月里，人要吃饭、货要换手、钱要借贷。于是港口有了仓库、有了钱庄、有了说着十几种语言的街道。','>一座港口真正的财富，是让陌生人愿意在这里等。','后来葡萄牙人来了，荷兰人来了，英国人也来了。他们修起堡垒，却没能改变风的方向。蒸汽船出现之后，风不再重要，马六甲才慢慢安静下来。','今天站在河口，还能感觉到那阵风。它不再推着谁的帆，只是吹动游客手里的冰淇淋纸。']},
+ {id:'ticket',title:'一张 1937 年的船票',date:'2026-09-28',img:ART.map,min:5,
+  sum:'从汕头到新加坡，七天七夜，统舱，票价十二块叻币。',
+  body:['这张船票夹在一本旧账簿里。纸已经发黄，印着「芝巴德号」和一行小字：统舱，不供膳。','统舱在船的最底层，几百人挤在一起，用自带的草席划出自己的地盘。买不起船票的人，可以先「赊」，到了南洋再用工钱抵。','>那时的人管这叫「过番」，好像只是去隔壁村。','船票的主人后来在一家胡椒园做工，十年后开了一间杂货店。账簿最后一页写着：寄回家中银二十元。']},
+ {id:'pepper',title:'胡椒、丁香与一场全球竞赛',date:'2026-09-15',img:ART.spice,min:8,
+  sum:'一小把香料，为什么能让几个欧洲王国赌上整支舰队？',
+  body:['在冰箱发明之前，香料是让食物「变得能吃」的东西，也是身份的象征。一磅肉豆蔻在阿姆斯特丹的价格，可以是产地的几百倍。','真正的利润不在种植，而在垄断。荷兰东印度公司为了控制丁香，把其他岛上的丁香树砍光，只留一个岛。','>历史上很多战争，起因听起来都像厨房里的事。','到了十八世纪，法国人偷偷把丁香苗带去毛里求斯，垄断就此瓦解。香料价格一落千丈，那场持续两百年的竞赛，悄无声息地结束了。']}
+];
+const SEED=[
+ {id:'s1',ts:'2026-10-14T21:10',text:'今天的天空像被人用水彩刷过一遍。',imgs:[ART.sky]},
+ {id:'s2',ts:'2026-10-14T16:42',text:'下午在旧书摊翻到一张老地图，海岸线画得歪歪扭扭，但每个港口的名字都写得特别认真。',imgs:[]},
+ {id:'s3',ts:'2026-10-13T22:05',text:'夜里写不动的时候，就泡一壶茶。',imgs:[ART.tea,ART.night]},
+ {id:'s4',ts:'2026-10-13T11:20',link:'ticket',text:'新长文发了，写一张船票背后的故事。'},
+ {id:'s5',ts:'2026-10-12T18:30',text:'骑楼的颜色真的很会。',imgs:[ART.street,ART.sea,ART.map]}
+];
+
+/* ---------- state ---------- */
+const KEY='chatblog.mine.v1';
+let mine=JSON.parse(localStorage.getItem(KEY)||'[]');
+let pending=[];
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const all=()=>[...mine,...SEED].sort((a,b)=>b.ts.localeCompare(a.ts));
+let query='';
+
+function dayLabel(ts){
+  const d=new Date(ts),n=new Date(),y=new Date(Date.now()-864e5);
+  const same=(a,b)=>a.toDateString()===b.toDateString();
+  if(same(d,n))return'今天';if(same(d,y))return'昨天';
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+const hm=ts=>new Date(ts).toTimeString().slice(0,5);
+
+function msgHTML(m){
+  const isMine=mine.some(x=>x.id===m.id);
+  let h=`<div class="msg me ${isMine?'mine':''}" data-id="${m.id}">`;
+  if(m.imgs&&m.imgs.length){const n=Math.min(m.imgs.length,4);h+=`<div class="pics n${n}">${m.imgs.slice(0,4).map(s=>`<img src="${s}" alt="" loading="lazy">`).join('')}</div>`}
+  if(m.text)h+=`<div class="bubble">${esc(m.text)}</div>`;
+  if(m.link){const L=LONGS.find(l=>l.id===m.link);h+=`<div class="linkcard" data-open="${L.id}"><img src="${L.img}" alt=""><div><b>${L.title}</b><span>长文 · ${L.min} 分钟</span></div></div>`}
+  h+=`<div class="time">${hm(m.ts)}${isMine?'<button class="del">删除</button>':''}</div></div>`;
+  return h;
+}
+function match(m){if(!query)return true;const L=m.link&&LONGS.find(l=>l.id===m.link);return (m.text||'').includes(query)||(L&&L.title.includes(query))}
+function renderChat(el,list,withDays=true){
+  // chat reads top → bottom, oldest first
+  const arr=list.filter(match).slice().reverse();
+  if(!arr.length){el.innerHTML='<div class="empty">没有找到碎片</div>';return}
+  let h='',last='';
+  arr.forEach(m=>{const d=dayLabel(m.ts);if(withDays&&d!==last){h+=`<div class="day">${d}</div>`;last=d}h+=msgHTML(m)});
+  el.innerHTML=h;
+}
+function render(){
+  const ls=LONGS.filter(l=>!query||l.title.includes(query)||l.sum.includes(query)||l.body.join('').includes(query));
+  $('#fan').innerHTML=LONGS.map(l=>`<div class="card" data-open="${l.id}"><img class="img" src="${l.img}" alt=""><div class="meta"><div class="t">${l.title}</div><div class="s">长文 · ${l.date.slice(5).replace('-','月')}日</div></div></div>`).join('');
+  renderChat($('#homeChat'),all().slice(0,3),false);
+  renderChat($('#fragChat'),all());
+  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}"><img src="${l.img}" alt=""><div><h3>${l.title}</h3><p>${l.sum}</p><small>${l.date} · ${l.min} 分钟</small></div></div>`).join(''):'<div class="empty">没有找到长文</div>';
+}
+
+/* ---------- tabs ---------- */
+const views=['home','frag','long'];
+function go(v,push=true){
+  const i=views.indexOf(v);
+  document.querySelectorAll('#tabs button').forEach((b,j)=>b.classList.toggle('on',j===i));
+  $('#pill').style.transform=`translateX(${i*100}%)`;
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+  $('#dock').classList.toggle('hide',v==='long');
+  window.scrollTo({top:v==='frag'?document.body.scrollHeight:0});
+  if(v==='frag')requestAnimationFrame(()=>window.scrollTo({top:document.body.scrollHeight}));
+  if(push)history.replaceState(null,'','#'+v);
+}
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
+
+/* ---------- reader ---------- */
+function openLong(id){
+  const L=LONGS.find(l=>l.id===id);if(!L)return;
+  $('#reader').innerHTML=`<img class="hero" src="${L.img}" alt=""><article><h1>${L.title}</h1><div class="by">JY · ${L.date} · ${L.min} 分钟读完</div>${L.body.map(p=>p.startsWith('>')?`<blockquote>${esc(p.slice(1))}</blockquote>`:`<p>${esc(p)}</p>`).join('')}</article>`;
+  $('#reader').classList.add('on');$('#reader').scrollTop=0;$('#btnClose').classList.remove('hide');document.body.style.overflow='hidden';
+}
+function closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow=''}
+$('#btnClose').onclick=closeLong;
+
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]');if(o){openLong(o.dataset.open);return}
+  const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}
+  const img=e.target.closest('.pics img');if(img){$('#lbImg').src=img.src;$('#lb').classList.add('on');return}
+  const d=e.target.closest('.del');if(d){const id=d.closest('.msg').dataset.id;mine=mine.filter(m=>m.id!==id);save();render();return}
+  if(!e.target.closest('#sheet,#btnMe'))$('#sheet').classList.remove('on');
+});
+$('#lb').onclick=()=>$('#lb').classList.remove('on');
+
+/* ---------- search / me ---------- */
+$('#btnSearch').onclick=()=>{const s=$('#searchBox');s.classList.toggle('on');if(s.classList.contains('on'))$('#q').focus();else{query='';$('#q').value='';render()}};
+$('#q').oninput=e=>{query=e.target.value.trim();render()};
+$('#btnMe').onclick=()=>$('#sheet').classList.toggle('on');
+$('#btnClear').onclick=()=>{if(confirm('清空你在这台设备上发的碎片？')){mine=[];save();render();$('#sheet').classList.remove('on')}};
+
+/* ---------- composer ---------- */
+const input=$('#input');
+function sync(){
+  input.style.height='auto';input.style.height=Math.min(input.scrollHeight,140)+'px';
+  const has=input.value.trim()||pending.length;
+  $('#btnSend').classList.toggle('hide',!has);$('#btnMic').classList.toggle('hide',!!has);
+  $('#thumbs').innerHTML=pending.map((s,i)=>`<div><img src="${s}"><button data-rm="${i}">✕</button></div>`).join('');
+}
+input.addEventListener('input',sync);
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&window.innerWidth>700){e.preventDefault();send()}});
+$('#thumbs').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){pending.splice(+b.dataset.rm,1);sync()}});
+$('#btnAdd').onclick=()=>$('#file').click();
+$('#btnMic').onclick=()=>{input.placeholder='语音还没做，先打字吧～';setTimeout(()=>input.placeholder='写点碎片…',1800)};
+$('#file').onchange=async e=>{
+  for(const f of [...e.target.files].slice(0,4-pending.length))pending.push(await shrink(f));
+  e.target.value='';sync();
+};
+function shrink(file){return new Promise(res=>{
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+    const k=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement('canvas');
+    c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    res(c.toDataURL('image/jpeg',.82));};im.src=r.result};r.readAsDataURL(file)})}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mine))}catch(e){alert('本机空间满了，删几张图再发吧')}}
+function send(){
+  const text=input.value.trim();if(!text&&!pending.length)return;
+  const now=new Date(),pad=n=>String(n).padStart(2,'0');
+  const ts=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  mine.unshift({id:'m'+Date.now(),ts,text,imgs:pending.slice()});
+  save();input.value='';pending=[];sync();
+  const onHome=$('#v-home').classList.contains('on');
+  if(onHome)go('frag');else{render();window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}
+  render();requestAnimationFrame(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}));
+}
+$('#btnSend').onclick=send;
+
+render();
+go(views.includes(location.hash.slice(1))?location.hash.slice(1):'home',false);
+</script>
+</body>
+</html>
