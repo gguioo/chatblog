@@ -169,7 +169,7 @@ textarea::placeholder{color:#8b90ac}
 @media (min-width:640px){.fan{height:420px}.card{width:46%}}
 
 /* ---------- light theme (white background) ---------- */
-@font-face{font-family:"CaveatNav";src:url("fonts/caveat-nav.woff2") format("woff2");font-weight:400 700;font-display:swap}
+@font-face{font-family:"CaveatNav";src:url("fonts/caveat-latin.woff2") format("woff2");font-weight:400 700;font-display:swap}
 .tabs button{font-family:"CaveatNav","Segoe Print","Bradley Hand","Comic Sans MS",cursive;font-size:25px;font-weight:600;letter-spacing:.3px;line-height:1}
 
 :root{--bg1:#ffffff;--bg2:#ffffff;--bg3:#ffffff;
@@ -239,6 +239,26 @@ body::before{display:none}
 .pc.link img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
 .pc.link b{display:block;padding:10px 14px 2px;font-size:15px}
 .pc.link i{display:block;padding:0 14px 12px;font-style:normal;font-size:12px;color:#8a8fa3}
+/* ---------- home letter ---------- */
+.letter{position:relative;max-width:560px;margin:26px auto 8px;padding:34px 30px 26px 46px;
+  font-family:"CaveatNav","Bradley Hand","Segoe Print",cursive;color:#2b3150;
+  background:#fffdf7 linear-gradient(transparent 33px,rgba(70,110,190,.13) 33px,rgba(70,110,190,.13) 34px) 0 6px/100% 34px;
+  border-radius:3px;transform:rotate(-1.2deg);
+  box-shadow:0 1px 1px rgba(20,23,43,.06),0 14px 34px rgba(20,23,43,.12)}
+.letter::before{content:"";position:absolute;top:0;bottom:0;left:30px;width:1px;background:rgba(220,90,90,.35)}
+.letter::after{content:"";position:absolute;top:-12px;left:50%;width:96px;height:26px;transform:translateX(-50%) rotate(3deg);
+  background:rgba(250,214,120,.55);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.letter h1{margin:0 0 6px;font-size:31px;font-weight:700;line-height:34px;color:#20253f}
+.letter p{margin:0 0 0;font-size:22px;line-height:34px;font-weight:500}
+.letter p+p{margin-top:34px}
+.letter .sig{text-align:right;font-size:26px;line-height:34px;font-weight:700;margin-top:8px;color:#3a5ba8;transform:rotate(-4deg)}
+.letter .w{opacity:0;transform:translateY(6px);animation:ink .9s ease forwards}
+.letter .sig.w{transform:translateY(6px) rotate(-4deg);animation-name:inks}
+.letter .w:nth-child(1){animation-delay:.1s}.letter .w:nth-child(2){animation-delay:.45s}.letter .w:nth-child(3){animation-delay:.8s}.letter .w:nth-child(4){animation-delay:1.25s}
+@keyframes ink{to{opacity:1;transform:none}}
+@keyframes inks{to{opacity:1;transform:rotate(-4deg)}}
+@media (prefers-reduced-motion:reduce){.letter .w{animation:none;opacity:1;transform:none}.letter .sig.w{transform:rotate(-4deg)}}
+@media (max-width:420px){.letter{padding:30px 20px 22px 38px;margin:22px 4px 6px}.letter::before{left:24px}.letter h1{font-size:27px}.letter p{font-size:20px}}
 </style>
 </head>
 <body>
@@ -268,7 +288,12 @@ body::before{display:none}
 
 <main>
   <section class="view on" id="v-home">
-    <div class="hello"><h1 id="greet">你好，路过的人</h1><p>短的想法放进「碎片」，慢慢写完的放进「长文」。</p></div>
+    <article class="letter" aria-label="about this notebook">
+      <h1 class="w">hi, you found my little notebook.</h1>
+      <p class="w">I keep this blog mostly for myself &mdash; not only for the important things, but for the small, random ones too. Some of them may mean nothing at all, and that&rsquo;s okay.</p>
+      <p class="w">Think of it as an old-fashioned diary: a place to write things down, so that one day I can look back and remember.</p>
+      <div class="sig w">&mdash; JY</div>
+    </article>
     <div class="sec"><h2>最近的长文</h2><button data-go="long">全部 →</button></div>
     <div class="fan" id="fan"></div>
     <div class="sec"><h2>刚冒出来的碎片</h2><button data-go="frag">全部 →</button></div>
@@ -466,7 +491,7 @@ $('#btnSearch').onclick=()=>{const s=$('#searchBox');s.classList.toggle('on');if
 $('#q').oninput=e=>{query=e.target.value.trim();render()};
 
 
-render();{const hr=new Date().getHours();$("#greet").textContent=(hr<5?"夜深了":hr<11?"早上好":hr<14?"中午好":hr<18?"下午好":"晚上好")+"，路过的人"}
+render();
 go(views.includes(location.hash.slice(1))?location.hash.slice(1):'home',false);
 
 /* profile pop: avatar grows to center, tap it again to shrink back */
