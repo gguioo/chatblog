@@ -221,6 +221,24 @@ body::before{display:none}
   text-decoration:none;font-size:15px;font-weight:600;margin-bottom:12px}
 .pfgo{display:block;padding:15px;border-radius:99px;background:#14172b;color:#fff;text-decoration:none;font-size:16px;font-weight:600}
 .pfgo:active,.pfgh:active{transform:scale(.97)}
+/* ---------- feed: messy pinboard ---------- */
+.board{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;padding:10px 0 60px}
+.pc{position:relative;margin:-10px -12px;transition:transform .45s cubic-bezier(.22,.9,.24,1.2),box-shadow .3s;cursor:pointer;
+  transform:translate(var(--x),var(--y)) rotate(var(--r));z-index:var(--z)}
+.pc.lift{transform:translate(var(--x),var(--y)) rotate(0) scale(1.06);z-index:40!important}
+.pc.note{background:#fffdf6;color:#2a2d3c;padding:18px 18px 14px;border-radius:4px;font-size:16px;line-height:1.7;
+  box-shadow:0 10px 24px rgba(20,23,43,.13),0 1px 2px rgba(20,23,43,.08);white-space:pre-wrap;word-break:break-word}
+.pc.note.y{background:#fff6c9}.pc.note.b{background:#e9f1ff}.pc.note.p{background:#ffe9ef}.pc.note.g{background:#eaf6e6}
+.pc.note small{display:block;margin-top:10px;font-size:12px;color:#8a8fa3}
+.pc.note.tape::before{content:"";position:absolute;top:-10px;left:50%;width:70px;height:22px;transform:translateX(-50%) rotate(-3deg);
+  background:rgba(255,255,255,.55);box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:1px dashed rgba(0,0,0,.06);border-right:1px dashed rgba(0,0,0,.06)}
+.pc.photo{background:#fff;padding:8px 8px 30px;border-radius:3px;box-shadow:0 12px 28px rgba(20,23,43,.18),0 1px 2px rgba(20,23,43,.1)}
+.pc.photo img{display:block;width:100%;aspect-ratio:var(--ar);object-fit:cover;border-radius:2px;background:#eceef3}
+.pc.photo span{position:absolute;left:0;right:0;bottom:7px;text-align:center;font-family:"CaveatNav","Bradley Hand",cursive;font-size:15px;color:#6b7086}
+.pc.link{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 12px 28px rgba(20,23,43,.16)}
+.pc.link img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.pc.link b{display:block;padding:10px 14px 2px;font-size:15px}
+.pc.link i{display:block;padding:0 14px 12px;font-style:normal;font-size:12px;color:#8a8fa3}
 </style>
 </head>
 <body>
@@ -256,7 +274,7 @@ body::before{display:none}
     <div class="sec"><h2>刚冒出来的碎片</h2><button data-go="frag">全部 →</button></div>
     <div class="chat" id="homeChat"></div>
   </section>
-  <section class="view" id="v-frag"><div class="chat" id="fragChat"></div></section>
+  <section class="view" id="v-frag"><div class="board" id="fragBoard"></div></section>
   <section class="view" id="v-long"><div class="sec" style="margin-top:14px"><h2>长文</h2></div><div class="list" id="longList"></div></section>
 </main>
 
@@ -382,10 +400,36 @@ function render(){GID=0;
   const ls=LONGS.filter(l=>!query||l.title.includes(query)||l.sum.includes(query)||l.body.join('').includes(query));
   $('#fan').innerHTML=LONGS.map(l=>`<div class="card" data-open="${l.id}"><img class="img" src="${l.img}" alt=""><div class="meta"><div class="t">${l.title}</div><div class="s">长文 · ${l.date.slice(5).replace('-','月')}日</div></div></div>`).join('');
   renderChat($('#homeChat'),all().slice(0,3),false);
-  renderChat($('#fragChat'),all());
+  renderBoard($('#fragBoard'),all());
   document.querySelectorAll('main .stack').forEach(st=>deckInit(st));
   $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}"><img src="${l.img}" alt=""><div><h3>${l.title}</h3><p>${l.sum}</p><small>${l.date} · ${l.min} 分钟</small></div></div>`).join(''):'<div class="empty">没有找到长文</div>';
 }
+
+
+/* feed: everything scattered at random — notes and photos tilted any which way */
+function renderBoard(el,list){
+  const arr=list.filter(match);
+  if(!arr.length){el.innerHTML='<div class="empty">没有找到碎片</div>';return}
+  const R=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)];
+  const W=Math.min(innerWidth,720);let h='';
+  const pos=()=>`--r:${R(-11,11).toFixed(1)}deg;--x:${R(-14,14).toFixed(0)}px;--y:${R(-10,14).toFixed(0)}px;--z:${Math.floor(R(1,20))}`;
+  const pieces=[];
+  arr.forEach(m=>{
+    const d=`${dayLabel(m.ts)} ${hm(m.ts)}`;
+    if(m.text&&!m.link)pieces.push(`<div class="pc note ${pick(['','y','b','p','g'])} ${Math.random()<.5?'tape':''}" data-lift style="${pos()};width:${R(W*.42,W*.62).toFixed(0)}px">${esc(m.text)}<small>${d}</small></div>`);
+    if(m.link){const L=LONGS.find(l=>l.id===m.link);pieces.push(`<div class="pc link" data-open="${L.id}" style="${pos()};width:${R(W*.46,W*.58).toFixed(0)}px"><img src="${L.img}" alt=""><b>${L.title}</b><i>长文 · ${L.min} 分钟</i></div>`)}
+    if(m.imgs&&m.imgs.length){const g='g'+(GID++);GALS[g]=m.imgs;
+      m.imgs.forEach((src,k)=>pieces.push(`<div class="pc photo" data-gal="${g}" data-k="${k}" style="${pos()};--ar:${pick(['1/1','4/5','4/3','3/4'])};width:${R(W*.34,W*.5).toFixed(0)}px"><img src="${src}" alt="" loading="lazy" draggable="false"><span>${k===0?d:''}</span></div>`))}
+  });
+  // shuffle a little so pieces from one post do not always sit together
+  for(let i=pieces.length-1;i>0;i--){if(Math.random()<.35){const j=Math.max(0,i-2+Math.floor(Math.random()*2));[pieces[i],pieces[j]]=[pieces[j],pieces[i]]}}
+  el.innerHTML=pieces.join('');
+}
+document.addEventListener('click',e=>{
+  const n=e.target.closest('#fragBoard .pc[data-lift]');
+  if(n){const on=n.classList.contains('lift');document.querySelectorAll('#fragBoard .lift').forEach(x=>x.classList.remove('lift'));if(!on)n.classList.add('lift');return}
+  const ph=e.target.closest('#fragBoard .pc.photo');if(ph){openGal(ph.dataset.gal,+ph.dataset.k)}
+});
 
 /* ---------- tabs ---------- */
 const views=['home','frag','long'];
@@ -411,7 +455,7 @@ $('#btnClose').onclick=closeLong;
 document.addEventListener('click',e=>{
   const o=e.target.closest('[data-open]');if(o){openLong(o.dataset.open);return}
   const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}
-  const ex=e.target.closest('[data-gal]');if(ex){const st=ex.closest('.stack');openGal(ex.dataset.gal,st._deck?st._deck.order[0]:0);return}
+  const ex=e.target.closest('[data-gal]');if(ex&&!ex.closest('#fragBoard')){const st=ex.closest('.stack');openGal(ex.dataset.gal,st._deck?st._deck.order[0]:0);return}
   if(e.target.closest('#gal')){if(e.target.closest('#galX')||!e.target.closest('.gdeck'))closeGal();return}
   if(!e.target.closest('#sheet,#btnMe'))$('#sheet').classList.remove('on');
 });
