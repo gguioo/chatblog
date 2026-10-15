@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#151a33">
+<meta name="theme-color" content="#ffffff">
 <title>碎碎念 · Chat Blog Demo</title>
 <style>
 :root{
@@ -167,6 +167,38 @@ textarea::placeholder{color:#8b90ac}
 .sheet button{width:100%;padding:11px;border-radius:14px;background:var(--glass2);margin-top:6px;font-size:14px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
 @media (min-width:640px){.fan{height:420px}.card{width:46%}}
+
+/* ---------- light theme (white background) ---------- */
+:root{--bg1:#ffffff;--bg2:#ffffff;--bg3:#ffffff;
+  --glass:rgba(20,23,43,.05);--glass2:rgba(20,23,43,.09);
+  --line:rgba(20,23,43,.09);--text:#14172b;--muted:#6b7086;
+  --bubble:#f2f3f6;--bubble2:#f7f8fa;color-scheme:light}
+body{background:#fff}
+body::before{display:none}
+.top{background:linear-gradient(to bottom,rgba(255,255,255,.94) 55%,rgba(255,255,255,0))}
+.circle svg{stroke:#14172b}
+.avatar{color:#fff}
+.tabs{background:rgba(20,23,43,.05)}
+.tabs .pill{background:#fff;box-shadow:0 4px 14px rgba(20,23,43,.12)}
+.card,.linkcard{background:#fff;border:1px solid var(--line);box-shadow:0 14px 34px rgba(20,23,43,.12)}
+.card .s,.linkcard span,.row small{color:#8a8fa3}
+.stack .sc{background:#eceef3;box-shadow:0 12px 28px rgba(20,23,43,.18);border:1px solid rgba(20,23,43,.06)}
+.stack .count{color:#fff}
+.expand svg{stroke:#14172b}
+.stack .expand svg{stroke:#fff}
+.time .del{color:#d6452f}
+.reader{background:#fff}
+.reader p{color:#2a2d3c}
+.reader blockquote{color:#4d5266}
+.gal{background:rgba(255,255,255,.88)}
+.gdeck .sc{background:#eceef3}
+.galtop span{background:rgba(20,23,43,.07);color:#14172b}
+.dots i{background:rgba(20,23,43,.2)}
+.dots i.on{background:#14172b}
+.dock{background:linear-gradient(to top,rgba(255,255,255,.96) 50%,rgba(255,255,255,0))}
+.composer,.search input{background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(20,23,43,.1)}
+.sheet{background:rgba(255,255,255,.97);box-shadow:0 12px 30px rgba(20,23,43,.14)}
+.send{background:#14172b;color:#fff}
 </style>
 </head>
 <body>
