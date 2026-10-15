@@ -257,6 +257,10 @@ body::before{display:none}
 .letter .w:nth-child(1){animation-delay:.1s}.letter .w:nth-child(2){animation-delay:.45s}.letter .w:nth-child(3){animation-delay:.8s}.letter .w:nth-child(4){animation-delay:1.25s}
 @keyframes ink{to{opacity:1;transform:none}}
 @keyframes inks{to{opacity:1;transform:rotate(-4deg)}}
+@media (min-width:640px){.letter{max-width:720px;padding:46px 46px 36px 72px;margin-top:36px;
+  background-image:linear-gradient(transparent 45px,rgba(70,110,190,.13) 45px,rgba(70,110,190,.13) 46px);background-size:100% 46px;background-position:0 8px}
+  .letter::before{left:48px}.letter h1{font-size:42px;line-height:46px;margin-bottom:8px}
+  .letter p{font-size:30px;line-height:46px}.letter p+p{margin-top:46px}.letter .sig{font-size:34px;line-height:46px}}
 @media (prefers-reduced-motion:reduce){.letter .w{animation:none;opacity:1;transform:none}.letter .sig.w{transform:rotate(-4deg)}}
 @media (max-width:420px){.letter{padding:30px 20px 22px 38px;margin:22px 4px 6px}.letter::before{left:24px}.letter h1{font-size:27px}.letter p{font-size:20px}}
 </style>
@@ -289,8 +293,9 @@ body::before{display:none}
 <main>
   <section class="view on" id="v-home">
     <article class="letter" aria-label="about this notebook">
-      <p class="w">I&rsquo;m just writing this blog to save some thoughts I think might be useful or meaningful to me. But I&rsquo;m not only doing it to store important things. Maybe that&rsquo;s my original motivation for starting this blog.</p>
-      <p class="w">Like, I&rsquo;ll put down some random things. Sometimes they might be meaningless. It feels like a traditional daily journal. Maybe I can look back on it later.</p>
+      <h1 class="w">hi, you found my little notebook.</h1>
+      <p class="w">I keep this blog mostly for myself &mdash; not only for the important things, but for the small, random ones too. Some of them may mean nothing at all, and that&rsquo;s okay.</p>
+      <p class="w">Think of it as an old-fashioned diary: a place to write things down, so that one day I can look back and remember.</p>
       <div class="sig w">&mdash; JY</div>
     </article>
     <div class="sec"><h2>最近的长文</h2><button data-go="long">全部 →</button></div>
