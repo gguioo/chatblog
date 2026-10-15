@@ -169,6 +169,9 @@ textarea::placeholder{color:#8b90ac}
 @media (min-width:640px){.fan{height:420px}.card{width:46%}}
 
 /* ---------- light theme (white background) ---------- */
+@font-face{font-family:"CaveatNav";src:url("fonts/caveat-nav.woff2") format("woff2");font-weight:400 700;font-display:swap}
+.tabs button{font-family:"CaveatNav","Segoe Print","Bradley Hand","Comic Sans MS",cursive;font-size:25px;font-weight:600;letter-spacing:.3px;line-height:1}
+
 :root{--bg1:#ffffff;--bg2:#ffffff;--bg3:#ffffff;
   --glass:rgba(20,23,43,.05);--glass2:rgba(20,23,43,.09);
   --line:rgba(20,23,43,.09);--text:#14172b;--muted:#6b7086;
@@ -208,9 +211,9 @@ body::before{display:none}
   <button class="circle" id="btnSearch" aria-label="搜索"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg></button>
   <nav class="tabs" id="tabs">
     <span class="pill" id="pill"></span>
-    <button data-v="home" class="on">主页</button>
-    <button data-v="frag">碎片</button>
-    <button data-v="long">长文</button>
+    <button data-v="home" class="on">home</button>
+    <button data-v="frag">feed</button>
+    <button data-v="long">archive</button>
   </nav>
   <button class="circle avatar" id="btnMe" aria-label="JY"><img src="img/avatar.jpg?v=2" alt="JY"></button>
 </div></header>
