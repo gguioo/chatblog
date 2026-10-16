@@ -139,22 +139,6 @@ main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px
 .reader blockquote{margin:1.6em 0;padding:4px 0 4px 18px;border-left:3px solid var(--accent);color:#c9cde0;font-style:italic}
 .close{position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:16px;z-index:51}
 
-/* ---------- composer ---------- */
-.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:14px 16px calc(env(safe-area-inset-bottom) + 16px);
-  background:linear-gradient(to top,rgba(11,14,32,.96) 50%,rgba(11,14,32,0));display:flex;justify-content:center}
-.composer{width:100%;max-width:720px;border-radius:34px;background:rgba(40,44,70,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--line);padding:8px 8px 8px 24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-.thumbs{display:flex;gap:8px;padding:8px 0 4px;overflow-x:auto}
-.thumbs:empty{display:none}
-.thumbs div{position:relative;flex:none}
-.thumbs img{width:64px;height:64px;border-radius:14px;object-fit:cover;display:block}
-.thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#000c;font-size:13px;line-height:22px}
-.crow{display:flex;align-items:flex-end;gap:4px}
-textarea{flex:1;resize:none;border:0;outline:0;background:none;color:var(--text);font:inherit;font-size:18px;line-height:1.5;padding:12px 0;max-height:140px}
-textarea::placeholder{color:#8b90ac}
-.ic{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;flex:none;transition:background .2s,transform .2s}
-.ic:active{transform:scale(.9)}
-.send{background:#f4f4f6;color:#14172b}
 .hide{display:none!important}
 
 /* ---------- misc ---------- */
@@ -199,10 +183,8 @@ body::before{display:none}
 .galtop span{background:rgba(20,23,43,.07);color:#14172b}
 .dots i{background:rgba(20,23,43,.2)}
 .dots i.on{background:#14172b}
-.dock{background:linear-gradient(to top,rgba(255,255,255,.96) 50%,rgba(255,255,255,0))}
-.composer,.search input{background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(20,23,43,.1)}
+.search input{background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(20,23,43,.1)}
 .sheet{background:rgba(255,255,255,.97);box-shadow:0 12px 30px rgba(20,23,43,.14)}
-.send{background:#14172b;color:#fff}
 /* ---------- profile pop ---------- */
 .pf{position:fixed;inset:0;z-index:70;background:rgba(255,255,255,.72);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
   opacity:0;pointer-events:none;transition:opacity .45s ease}
