@@ -164,8 +164,10 @@ async function loadArt(){
 /* ---------- delete / copy ---------- */
 document.addEventListener('click',async e=>{
   const c=e.target.closest('[data-copy]');if(c){navigator.clipboard.writeText(c.dataset.copy);c.textContent='已复制';return}
-  const d=e.target.closest('[data-del]');if(!d)return;
-  if(!d.classList.contains('sure')){d.classList.add('sure');d.textContent='确认删除？';setTimeout(()=>{d.classList.remove('sure');d.textContent='删除'},3000);return}
+  const d=e.target.closest('[data-del]');
+  document.querySelectorAll('.del.sure').forEach(b=>{if(b!==d){b.classList.remove('sure');b.textContent='删除'}});
+  if(!d)return;
+  if(!d.classList.contains('sure')){d.classList.add('sure');d.textContent='确认删除？';return}
   d.disabled=true;
   try{await api('/api/'+d.dataset.del,{method:'DELETE'});d.dataset.del.startsWith('feed')?loadFeed():loadArt()}
   catch(err){alert('删除失败：'+err.message);d.disabled=false}
