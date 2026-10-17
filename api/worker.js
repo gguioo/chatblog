@@ -52,7 +52,7 @@ export default {
     const m = req.method;
     if (m === 'OPTIONS') return new Response(null, { headers: cors(req) });
 
-    if (p === '/' || p === '/admin') return new Response(ADMIN, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    if (p === '/' || p === '/admin') return new Response(ADMIN, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
     if (m === 'GET' && p.startsWith('/f/')) return serveImg(env.FEED_IMG, p.slice(3));
     if (m === 'GET' && p.startsWith('/a/')) return serveImg(env.ART_IMG, p.slice(3));
 
