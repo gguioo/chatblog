@@ -21,7 +21,6 @@ const authed = (req, env) => req.headers.get('Authorization') === `Bearer ${env.
 // image URL <-> bucket key: /f/<key> lives in FEED_IMG, /a/<key> in ART_IMG
 const keysIn = (text, prefix) => [...String(text || '').matchAll(new RegExp(`/${prefix}/([\\w.-]+)`, 'g'))].map(m => m[1]);
 
-const plain = html => String(html).replace(/<(script|style)[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
 async function upload(req, env, url, bucket, prefix) {
   const file = (await req.formData()).get('file');
@@ -72,7 +71,7 @@ export default {
         return json(req, results.map(r => ({ ...r, photos: JSON.parse(r.photos) })));
       }
       if (m === 'GET' && p === '/api/articles') {
-        const { results } = await db.prepare('SELECT id,title,cover,excerpt,minutes,created_at FROM articles ORDER BY created_at DESC').all();
+        const { results } = await db.prepare('SELECT id,title,created_at FROM articles ORDER BY created_at DESC').all();
         return json(req, results);
       }
       let id = p.match(/^\/api\/articles\/(\d+)$/)?.[1];
@@ -127,9 +126,8 @@ export default {
       if (m === 'POST' && p === '/api/articles') {
         const { title = '', html = '' } = await req.json();
         if (!title.trim() || !html.trim()) return json(req, { error: 'title and html required' }, 400);
-        const text = plain(html);
         const r = await db.prepare('INSERT INTO articles (title,cover,html,excerpt,minutes,created_at) VALUES (?,?,?,?,?,?) RETURNING id')
-          .bind(title.trim(), '', html, text.slice(0, 90), Math.max(1, Math.round(text.length / 400)), new Date().toISOString()).first();
+          .bind(title.trim(), '', html, '', 0, new Date().toISOString()).first();
         return json(req, r, 201);
       }
       id = p.match(/^\/api\/articles\/(\d+)$/)?.[1];

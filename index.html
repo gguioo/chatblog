@@ -51,12 +51,10 @@ main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px
 .sec button{color:var(--muted);font-size:14px}
 
 /* ---------- fanned cards ---------- */
-.fan{position:relative;height:300px;margin:8px 0 10px}
+.fan{position:relative;height:240px;margin:8px 0 10px}
 .card{position:absolute;width:50%;border-radius:24px;overflow:hidden;background:#111;box-shadow:0 18px 40px rgba(0,0,0,.45);
   transition:transform .4s cubic-bezier(.2,.9,.2,1.1);cursor:pointer;border:1px solid rgba(255,255,255,.06)}
-.card .img{aspect-ratio:16/10;display:block;width:100%;object-fit:cover}
-.card .meta{padding:20px 20px 18px;min-height:150px;display:flex;flex-direction:column}
-.card .x{margin:8px 0 0;color:#8f94ab;font-size:13.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.card .meta{padding:20px 20px 18px;min-height:96px;display:flex;flex-direction:column;justify-content:space-between}
 .card .t{font-weight:700;font-size:16px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .s{color:#8f94ab;font-size:14px;margin-top:6px;display:flex;align-items:center;gap:6px}
 .fan .card:nth-child(1){left:0;top:96px;transform:rotate(-5deg);z-index:1}
@@ -108,21 +106,14 @@ main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px
 .list{display:grid;gap:18px}
 .row{display:flex;text-align:left;gap:16px;align-items:center;padding:12px;border-radius:26px;background:var(--glass);border:1px solid var(--line);cursor:pointer;transition:background .2s}
 .row:hover{background:var(--glass2)}
-.row img{width:108px;height:108px;border-radius:18px;object-fit:cover;flex:none}
 .row h3{margin:0 0 6px;font-size:18px;line-height:1.4}
 .row p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .row small{display:block;color:#7c82a0;margin-top:8px;font-size:12px}
 
 /* ---------- reader ---------- */
-.reader{position:fixed;inset:0;z-index:50;background:var(--bg3);overflow-y:auto;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.2,1)}
+.reader{position:fixed;inset:0;z-index:50;background:#fff;overflow:hidden;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.2,1)}
 .reader.on{transform:none}
-.reader .hero{width:100%;aspect-ratio:16/9;max-height:52vh;object-fit:cover;display:block;-webkit-mask-image:linear-gradient(#000 60%,transparent)}
-.reader article{max-width:660px;margin:-40px auto 0;padding:0 22px 120px;position:relative}
-.reader h1{font-family:"Songti SC","Noto Serif SC","Source Han Serif SC",serif;font-size:32px;line-height:1.35;margin:0 0 12px}
-.reader .by{color:var(--muted);font-size:14px;margin-bottom:30px}
-.reader p{font-family:"Songti SC","Noto Serif SC","Source Han Serif SC",serif;font-size:18.5px;line-height:2;color:#dfe2ee;margin:0 0 1.3em;text-align:justify}
-.reader .body img{max-width:100%;height:auto;border-radius:12px}
-.reader blockquote{margin:1.6em 0;padding:4px 0 4px 18px;border-left:3px solid var(--accent);color:#c9cde0;font-style:italic}
+.reader iframe{display:block;width:100%;height:100%;border:0;background:#fff}
 .close{position:fixed;top:calc(env(safe-area-inset-top) + 14px);right:16px;z-index:51}
 
 .hide{display:none!important}
@@ -136,7 +127,7 @@ main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px
 .sheet b{display:block;font-size:17px}.sheet span{color:var(--muted);font-size:13px;display:block;margin:4px 0 12px;line-height:1.6}
 .sheet button{width:100%;padding:11px;border-radius:14px;background:var(--glass2);margin-top:6px;font-size:14px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
-@media (min-width:640px){.fan{height:320px}.card{width:46%}}
+@media (min-width:640px){.fan{height:250px}.card{width:46%}}
 
 /* ---------- light theme (white background) ---------- */
 @font-face{font-family:"CaveatNav";src:url("fonts/caveat-latin.woff2") format("woff2");font-weight:400 700;font-display:swap}
@@ -159,8 +150,6 @@ body::before{display:none}
 .expand svg{stroke:#14172b}
 .stack .expand svg{stroke:#fff}
 .reader{background:#fff}
-.reader p{color:#2a2d3c}
-.reader blockquote{color:#4d5266}
 .gal{background:rgba(255,255,255,.88)}
 .gdeck .sc{background:#eceef3}
 .galtop span{background:rgba(20,23,43,.07);color:#14172b}
@@ -353,12 +342,12 @@ function renderChat(el,list){
   el.innerHTML=arr.length?arr.map(msgHTML).join(''):'<div class="empty">还没有碎片</div>';
 }
 function render(){GID=0;
-  const ls=ARTS.filter(l=>!query||l.title.includes(query)||l.excerpt.includes(query));
-  $('#fan').innerHTML=ARTS.slice(0,3).map(l=>`<div class="card" data-open="${l.id}"><div class="meta"><div class="t">${esc(l.title)}</div><p class="x">${esc(l.excerpt||'')}</p><div class="s">长文 · ${dayLabel(l.created_at)}</div></div></div>`).join('');
+  const ls=ARTS.filter(l=>!query||l.title.includes(query));
+  $('#fan').innerHTML=ARTS.slice(0,3).map(l=>`<div class="card" data-open="${l.id}"><div class="meta"><div class="t">${esc(l.title)}</div><div class="s">长文 · ${dayLabel(l.created_at)}</div></div></div>`).join('');
   renderChat($('#homeChat'),FEED.slice(0,3));
   renderBoard($('#fragBoard'),FEED);
   document.querySelectorAll('main .stack').forEach(st=>deckInit(st));
-  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}"><div><h3>${esc(l.title)}</h3><p>${esc(l.excerpt)}</p><small>${ymd(l.created_at)}</small></div></div>`).join(''):'<div class="empty">还没有长文</div>';
+  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}"><div><h3>${esc(l.title)}</h3><small>${ymd(l.created_at)}</small></div></div>`).join(''):'<div class="empty">还没有长文</div>';
 }
 async function load(){
   try{[FEED,ARTS]=await Promise.all(['feed','articles'].map(p=>fetch(`${API}/api/${p}`).then(r=>r.json())))}
@@ -406,10 +395,12 @@ $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)
 /* ---------- reader ---------- */
 async function openLong(id){
   const L=await fetch(`${API}/api/articles/${id}`).then(r=>r.json()).catch(()=>null);if(!L||!L.html)return;
-  $('#reader').innerHTML=`<article><h1>${esc(L.title)}</h1><div class="by">JY · ${ymd(L.created_at)}</div><div class="body">${L.html}</div></article>`;
+  // 正文放进隔离的 iframe：它的样式和脚本碰不到主页面
+  const f=document.createElement('iframe');f.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox');
+  f.title=L.title;f.srcdoc=L.html;$('#reader').replaceChildren(f);
   $('#reader').classList.add('on');$('#reader').scrollTop=0;$('#btnClose').classList.remove('hide');document.body.style.overflow='hidden';
 }
-function closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow=''}
+function closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow='';setTimeout(()=>{if(!$('#reader').classList.contains('on'))$('#reader').replaceChildren()},550)}
 $('#btnClose').onclick=closeLong;
 
 document.addEventListener('click',e=>{
