@@ -26,10 +26,18 @@ const plain = html => String(html).replace(/<(script|style)[\s\S]*?<\/\1>/gi, ''
 async function upload(req, env, url, bucket, prefix) {
   const file = (await req.formData()).get('file');
   if (!file || typeof file === 'string') return json(req, { error: 'no file' }, 400);
-  if (!IMG_TYPES.includes(file.type)) return json(req, { error: 'not an image' }, 400);
-  const ext = file.type.split('/')[1].replace('jpeg', 'jpg');
+  let type = file.type;
+  if (!IMG_TYPES.includes(type)) {
+    // 手机有时不给类型或给 octet-stream：按文件头识别
+    const b = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    const hex = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+    type = hex.startsWith('ffd8ff') ? 'image/jpeg' : hex.startsWith('89504e47') ? 'image/png'
+      : hex.startsWith('47494638') ? 'image/gif' : (hex.startsWith('52494646') && hex.slice(16, 24) === '57454250') ? 'image/webp' : '';
+    if (!type) return json(req, { error: '不支持的图片格式（' + (file.type || '未知') + '），请用 JPG/PNG/WebP' }, 400);
+  }
+  const ext = type.split('/')[1].replace('jpeg', 'jpg');
   const key = `${crypto.randomUUID()}.${ext}`;
-  await bucket.put(key, file.stream(), { httpMetadata: { contentType: file.type } });
+  await bucket.put(key, file.stream(), { httpMetadata: { contentType: type } });
   return json(req, { url: `${url.origin}/${prefix}/${key}` });
 }
 

@@ -93,7 +93,16 @@ async function api(path,opt={}){
   if(!r.ok)throw new Error(d.error||r.status);
   return d;
 }
-const up=(kind,file)=>{const fd=new FormData();fd.append('file',file);return api('/api/upload/'+kind,{method:'POST',body:fd}).then(d=>d.url)};
+// 上传前在手机上转成 JPEG 并压到最长边 2560px；浏览器解不开（如 HEIC）就原样上传
+async function shrink(file){
+  try{const bmp=await createImageBitmap(file);const s=Math.min(1,2560/Math.max(bmp.width,bmp.height));
+    if(s===1&&/^image\/(jpeg|png|webp|gif)$/.test(file.type)&&file.size<4e6)return file;
+    const c=document.createElement('canvas');c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));return b?new File([b],'photo.jpg',{type:'image/jpeg'}):file}
+  catch(_){return file}
+}
+const up=async(kind,file)=>{file=await shrink(file);const fd=new FormData();fd.append('file',file);return api('/api/upload/'+kind,{method:'POST',body:fd}).then(d=>d.url)};
 
 async function login(){
   TOKEN=$('#token').value.trim()||TOKEN;
