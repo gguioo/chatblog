@@ -102,7 +102,13 @@ async function shrink(file){
     const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));return b?new File([b],'photo.jpg',{type:'image/jpeg'}):file}
   catch(_){return file}
 }
-const up=async(kind,file)=>{file=await shrink(file);const fd=new FormData();fd.append('file',file);return api('/api/upload/'+kind,{method:'POST',body:fd}).then(d=>d.url)};
+const up=async(kind,file,onp)=>{file=await shrink(file);const fd=new FormData();fd.append('file',file);
+  return new Promise((ok,no)=>{const x=new XMLHttpRequest();x.open('POST','/api/upload/'+kind);x.setRequestHeader('Authorization','Bearer '+TOKEN);
+    x.upload.onprogress=e=>{if(e.lengthComputable&&onp)onp(e.loaded/e.total)};
+    x.onload=()=>{let d={};try{d=JSON.parse(x.responseText)}catch(_){}
+      if(x.status===401){logout();return no(new Error('密钥不对'))}
+      if(x.status>=200&&x.status<300&&d.url)return ok(d.url);no(new Error(d.error||('HTTP '+x.status)))};
+    x.onerror=()=>no(new Error('网络错误，没连上 b.she.dpdns.org'));x.send(fd)})};
 
 async function login(){
   TOKEN=$('#token').value.trim()||TOKEN;
@@ -121,7 +127,7 @@ document.querySelector('.tabs').onclick=e=>{const t=e.target.dataset.t;if(!t)ret
 let fPhotos=[];
 $('#fFiles').onchange=async e=>{
   const files=[...e.target.files];e.target.value='';$('#fMsg').textContent=`上传中 0/${files.length}`;
-  try{for(const [i,f] of files.entries()){fPhotos.push(await up('feed',f));$('#fMsg').textContent=`上传中 ${i+1}/${files.length}`}$('#fMsg').textContent=''}
+  try{for(const [i,f] of files.entries()){fPhotos.push(await up('feed',f,p=>{$('#fMsg').textContent=`上传中 ${i+1}/${files.length} · ${Math.round(p*100)}%`}));$('#fThumbs').innerHTML=fPhotos.map(u=>`<img src="${u}" alt="">`).join('')}$('#fMsg').textContent=`已上传 ${files.length} 张，可以发布了`}
   catch(err){$('#fMsg').textContent='上传失败：'+err.message}
   $('#fThumbs').innerHTML=fPhotos.map(u=>`<img src="${u}" alt="">`).join('');
 };
