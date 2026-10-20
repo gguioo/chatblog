@@ -332,9 +332,10 @@ function openGal(g,start){
   $('#dots').innerHTML=imgs.length>1?imgs.map(()=>'<i></i>').join(''):'';
   const sync=()=>{const k=+$('#gdeck .sc[data-p="0"]').dataset.k;$('#galN').textContent=`${k+1} / ${imgs.length}`;[...$('#dots').children].forEach((d,j)=>d.classList.toggle('on',j===k))};
   window._gdeck=deckInit($('#gdeck'),{rightPrev:true,onTap:()=>{},onChange:()=>setTimeout(sync,0)});
+  if(!$('#gal').classList.contains('on'))pushLayer('gal');
   $('#gal').classList.add('on');document.body.style.overflow='hidden';
 }
-function closeGal(){$('#gal').classList.remove('on');document.body.style.overflow='';window._gdeck=null}
+function _closeGal(){$('#gal').classList.remove('on');document.body.style.overflow='';window._gdeck=null}
 const match=m=>!query||m.text.includes(query);
 function renderChat(el,list){
   const arr=list.filter(match);
@@ -397,10 +398,19 @@ async function openLong(id){
   // 正文放进隔离的 iframe：它的样式和脚本碰不到主页面
   const f=document.createElement('iframe');f.setAttribute('sandbox','allow-scripts allow-popups allow-popups-to-escape-sandbox');
   f.title=L.title;f.srcdoc=L.html;$('#reader').replaceChildren(f);
+  if(!$('#reader').classList.contains('on'))pushLayer('long');
   $('#reader').classList.add('on');$('#reader').scrollTop=0;$('#btnClose').classList.remove('hide');document.body.style.overflow='hidden';
 }
-function closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow='';setTimeout(()=>{if(!$('#reader').classList.contains('on'))$('#reader').replaceChildren()},550)}
-$('#btnClose').onclick=closeLong;
+function _closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow='';setTimeout(()=>{if(!$('#reader').classList.contains('on'))$('#reader').replaceChildren()},550)}
+$('#btnClose').onclick=()=>closeLong();
+
+/* 返回手势：打开长文或大图时压一层历史，左滑/返回只关掉这一层，不会离开网站 */
+const LAYERS=[];
+function pushLayer(n){LAYERS.push(n);history.pushState({layer:n},'',location.href)}
+function closeTop(n){if(LAYERS[LAYERS.length-1]===n){history.back();return true}return false}
+function closeGal(){if(!closeTop('gal'))_closeGal()}
+function closeLong(){if(!closeTop('long'))_closeLong()}
+addEventListener('popstate',()=>{const n=LAYERS.pop();if(n==='gal')_closeGal();else if(n==='long')_closeLong()});
 
 document.addEventListener('click',e=>{
   const o=e.target.closest('[data-open]');if(o){openLong(o.dataset.open);return}
@@ -409,7 +419,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#gal')){if(e.target.closest('#galX')||!e.target.closest('.gdeck'))closeGal();return}
   if(!e.target.closest('#sheet,#btnMe'))$('#sheet').classList.remove('on');
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGal();closeLong()}if(window._gdeck){if(e.key==='ArrowRight')_gdeck.next(-1);if(e.key==='ArrowLeft')_gdeck.prev()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&LAYERS.length)history.back();if(window._gdeck){if(e.key==='ArrowRight')_gdeck.next(-1);if(e.key==='ArrowLeft')_gdeck.prev()}});
 
 /* ---------- search / me ---------- */
 $('#btnSearch').onclick=()=>{const s=$('#searchBox');s.classList.toggle('on');if(s.classList.contains('on'))$('#q').focus();else{query='';$('#q').value='';render()}};
