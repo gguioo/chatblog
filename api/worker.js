@@ -81,6 +81,26 @@ export default {
       if (m === 'POST' && p === '/api/upload/feed') return upload(req, env, url, env.FEED_IMG, 'f');
       if (m === 'POST' && p === '/api/upload/article') return upload(req, env, url, env.ART_IMG, 'a');
 
+      // 清理死图：R2 里没被任何碎片/长文引用、且上传超过 1 小时的图片
+      if (m === 'POST' && p === '/api/cleanup') {
+        const feed = (await db.prepare('SELECT photos FROM feed').all()).results;
+        const arts = (await db.prepare('SELECT cover,html FROM articles').all()).results;
+        const usedF = new Set(feed.flatMap(r => keysIn(r.photos, 'f')));
+        const usedA = new Set(arts.flatMap(r => keysIn(r.cover + ' ' + r.html, 'a')));
+        const cutoff = Date.now() - 3600e3;
+        const sweep = async (bucket, used) => {
+          let cursor, dead = [];
+          do {
+            const l = await bucket.list({ cursor, limit: 1000 });
+            for (const o of l.objects) if (!used.has(o.key) && o.uploaded.getTime() < cutoff) dead.push(o.key);
+            cursor = l.truncated ? l.cursor : undefined;
+          } while (cursor);
+          for (let i = 0; i < dead.length; i += 1000) await bucket.delete(dead.slice(i, i + 1000));
+          return dead.length;
+        };
+        return json(req, { ok: true, feed: await sweep(env.FEED_IMG, usedF), article: await sweep(env.ART_IMG, usedA) });
+      }
+
       if (m === 'POST' && p === '/api/feed') {
         const { text = '', photos = [] } = await req.json();
         if (!text.trim() && !photos.length) return json(req, { error: 'empty' }, 400);

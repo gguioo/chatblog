@@ -356,7 +356,7 @@ function render(){GID=0;
   renderChat($('#homeChat'),FEED.slice(0,3));
   renderBoard($('#fragBoard'),FEED);
   document.querySelectorAll('main .stack').forEach(st=>deckInit(st));
-  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}">${l.cover?`<img src="${l.cover}" alt="">`:''}<div><h3>${esc(l.title)}</h3><p>${esc(l.excerpt)}</p><small>${ymd(l.created_at)} · ${l.minutes} 分钟</small></div></div>`).join(''):'<div class="empty">还没有长文</div>';
+  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}">${l.cover?`<img src="${l.cover}" alt="">`:''}<div><h3>${esc(l.title)}</h3><p>${esc(l.excerpt)}</p><small>${ymd(l.created_at)}</small></div></div>`).join(''):'<div class="empty">还没有长文</div>';
 }
 async function load(){
   try{[FEED,ARTS]=await Promise.all(['feed','articles'].map(p=>fetch(`${API}/api/${p}`).then(r=>r.json())))}
@@ -404,7 +404,7 @@ $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)
 /* ---------- reader ---------- */
 async function openLong(id){
   const L=await fetch(`${API}/api/articles/${id}`).then(r=>r.json()).catch(()=>null);if(!L||!L.html)return;
-  $('#reader').innerHTML=`${L.cover?`<img class="hero" src="${L.cover}" alt="">`:''}<article><h1>${esc(L.title)}</h1><div class="by">JY · ${ymd(L.created_at)} · ${L.minutes} 分钟读完</div><div class="body">${L.html}</div></article>`;
+  $('#reader').innerHTML=`${L.cover?`<img class="hero" src="${L.cover}" alt="">`:''}<article><h1>${esc(L.title)}</h1><div class="by">JY · ${ymd(L.created_at)}</div><div class="body">${L.html}</div></article>`;
   $('#reader').classList.add('on');$('#reader').scrollTop=0;$('#btnClose').classList.remove('hide');document.body.style.overflow='hidden';
 }
 function closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow=''}

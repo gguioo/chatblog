@@ -51,7 +51,7 @@ label{display:block;font-size:13px;color:#6b7086;margin:4px 0 6px}
   </section>
 
   <div id="app" class="hide">
-    <div class="tabs"><button data-t="feed" class="on">碎片</button><button data-t="art">长文</button><button id="btnOut">退出</button></div>
+    <div class="tabs"><button data-t="feed" class="on">碎片</button><button data-t="art">长文</button><button id="btnClean">清理死图</button><button id="btnOut">退出</button></div>
 
     <section id="t-feed">
       <div class="box">
@@ -158,8 +158,11 @@ $('#aPost').onclick=async()=>{
 };
 async function loadArt(){
   const list=await fetch('/api/articles').then(r=>r.json());
-  $('#aList').innerHTML=list.length?list.map(a=>`<div class="item">${a.cover?`<img src="${a.cover}" alt="">`:''}<div><p><b>${esc(a.title)}</b></p><small>${day(a.created_at)} · ${a.minutes} 分钟</small></div><button class="del" data-del="articles/${a.id}">删除</button></div>`).join(''):'<small>还没有长文</small>';
+  $('#aList').innerHTML=list.length?list.map(a=>`<div class="item">${a.cover?`<img src="${a.cover}" alt="">`:''}<div><p><b>${esc(a.title)}</b></p><small>${day(a.created_at)}</small></div><button class="del" data-del="articles/${a.id}">删除</button></div>`).join(''):'<small>还没有长文</small>';
 }
+
+$('#btnClean').onclick=async()=>{const b=$('#btnClean');if(!confirm('删除所有没被碎片或长文引用、且上传超过 1 小时的图片？'))return;b.disabled=true;
+  try{const r=await api('/api/cleanup',{method:'POST'});alert(`已清理：碎片图 ${r.feed} 张，长文图 ${r.article} 张`)}catch(err){alert('清理失败：'+err.message)}b.disabled=false};
 
 /* ---------- delete / copy ---------- */
 document.addEventListener('click',async e=>{
