@@ -50,12 +50,13 @@ main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px
 .sec button{color:var(--muted);font-size:14px}
 
 /* ---------- fanned cards ---------- */
-.fan{position:relative;height:350px;margin:8px 0 10px}
+.fan{position:relative;height:300px;margin:8px 0 10px}
 .card{position:absolute;width:50%;border-radius:24px;overflow:hidden;background:#111;box-shadow:0 18px 40px rgba(0,0,0,.45);
   transition:transform .4s cubic-bezier(.2,.9,.2,1.1);cursor:pointer;border:1px solid rgba(255,255,255,.06)}
 .card .img{aspect-ratio:16/10;display:block;width:100%;object-fit:cover}
-.card .meta{padding:14px 18px 18px}
-.card .t{font-weight:700;font-size:16px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .meta{padding:20px 20px 18px;min-height:150px;display:flex;flex-direction:column}
+.card .x{margin:8px 0 0;color:#8f94ab;font-size:13.5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.card .t{font-weight:700;font-size:16px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .s{color:#8f94ab;font-size:14px;margin-top:6px;display:flex;align-items:center;gap:6px}
 .fan .card:nth-child(1){left:0;top:96px;transform:rotate(-5deg);z-index:1}
 .fan .card:nth-child(2){left:25%;top:0;transform:rotate(1.5deg);z-index:3}
@@ -134,7 +135,7 @@ main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 100px
 .sheet b{display:block;font-size:17px}.sheet span{color:var(--muted);font-size:13px;display:block;margin:4px 0 12px;line-height:1.6}
 .sheet button{width:100%;padding:11px;border-radius:14px;background:var(--glass2);margin-top:6px;font-size:14px}
 .empty{color:var(--muted);text-align:center;padding:40px 0}
-@media (min-width:640px){.fan{height:420px}.card{width:46%}}
+@media (min-width:640px){.fan{height:320px}.card{width:46%}}
 
 /* ---------- light theme (white background) ---------- */
 @font-face{font-family:"CaveatNav";src:url("fonts/caveat-latin.woff2") format("woff2");font-weight:400 700;font-display:swap}
@@ -352,11 +353,11 @@ function renderChat(el,list){
 }
 function render(){GID=0;
   const ls=ARTS.filter(l=>!query||l.title.includes(query)||l.excerpt.includes(query));
-  $('#fan').innerHTML=ARTS.slice(0,3).map(l=>`<div class="card" data-open="${l.id}">${l.cover?`<img class="img" src="${l.cover}" alt="">`:''}<div class="meta"><div class="t">${esc(l.title)}</div><div class="s">长文 · ${dayLabel(l.created_at)}</div></div></div>`).join('');
+  $('#fan').innerHTML=ARTS.slice(0,3).map(l=>`<div class="card" data-open="${l.id}"><div class="meta"><div class="t">${esc(l.title)}</div><p class="x">${esc(l.excerpt||'')}</p><div class="s">长文 · ${dayLabel(l.created_at)}</div></div></div>`).join('');
   renderChat($('#homeChat'),FEED.slice(0,3));
   renderBoard($('#fragBoard'),FEED);
   document.querySelectorAll('main .stack').forEach(st=>deckInit(st));
-  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}">${l.cover?`<img src="${l.cover}" alt="">`:''}<div><h3>${esc(l.title)}</h3><p>${esc(l.excerpt)}</p><small>${ymd(l.created_at)}</small></div></div>`).join(''):'<div class="empty">还没有长文</div>';
+  $('#longList').innerHTML=ls.length?ls.map(l=>`<div class="row" data-open="${l.id}"><div><h3>${esc(l.title)}</h3><p>${esc(l.excerpt)}</p><small>${ymd(l.created_at)}</small></div></div>`).join(''):'<div class="empty">还没有长文</div>';
 }
 async function load(){
   try{[FEED,ARTS]=await Promise.all(['feed','articles'].map(p=>fetch(`${API}/api/${p}`).then(r=>r.json())))}
@@ -404,7 +405,7 @@ $('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)
 /* ---------- reader ---------- */
 async function openLong(id){
   const L=await fetch(`${API}/api/articles/${id}`).then(r=>r.json()).catch(()=>null);if(!L||!L.html)return;
-  $('#reader').innerHTML=`${L.cover?`<img class="hero" src="${L.cover}" alt="">`:''}<article><h1>${esc(L.title)}</h1><div class="by">JY · ${ymd(L.created_at)}</div><div class="body">${L.html}</div></article>`;
+  $('#reader').innerHTML=`<article><h1>${esc(L.title)}</h1><div class="by">JY · ${ymd(L.created_at)}</div><div class="body">${L.html}</div></article>`;
   $('#reader').classList.add('on');$('#reader').scrollTop=0;$('#btnClose').classList.remove('hide');document.body.style.overflow='hidden';
 }
 function closeLong(){$('#reader').classList.remove('on');$('#btnClose').classList.add('hide');document.body.style.overflow=''}

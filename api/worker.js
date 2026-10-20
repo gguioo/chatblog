@@ -79,7 +79,6 @@ export default {
 
       if (m === 'GET' && p === '/api/check') return json(req, { ok: true });
       if (m === 'POST' && p === '/api/upload/feed') return upload(req, env, url, env.FEED_IMG, 'f');
-      if (m === 'POST' && p === '/api/upload/article') return upload(req, env, url, env.ART_IMG, 'a');
 
       // 清理死图：R2 里没被任何碎片/长文引用、且上传超过 1 小时的图片
       if (m === 'POST' && p === '/api/cleanup') {
@@ -118,11 +117,11 @@ export default {
       }
 
       if (m === 'POST' && p === '/api/articles') {
-        const { title = '', cover = '', html = '' } = await req.json();
+        const { title = '', html = '' } = await req.json();
         if (!title.trim() || !html.trim()) return json(req, { error: 'title and html required' }, 400);
         const text = plain(html);
         const r = await db.prepare('INSERT INTO articles (title,cover,html,excerpt,minutes,created_at) VALUES (?,?,?,?,?,?) RETURNING id')
-          .bind(title.trim(), cover.trim(), html, text.slice(0, 90), Math.max(1, Math.round(text.length / 400)), new Date().toISOString()).first();
+          .bind(title.trim(), '', html, text.slice(0, 90), Math.max(1, Math.round(text.length / 400)), new Date().toISOString()).first();
         return json(req, r, 201);
       }
       id = p.match(/^\/api\/articles\/(\d+)$/)?.[1];

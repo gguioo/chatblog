@@ -70,12 +70,6 @@ label{display:block;font-size:13px;color:#6b7086;margin:4px 0 6px}
       <div class="box">
         <label>标题</label>
         <input type="text" id="aTitle">
-        <label>封面（长文图床）</label>
-        <input type="file" id="aCover" accept="image/*">
-        <img class="cover hide" id="aCoverImg" alt="">
-        <label>正文图片：上传后复制链接，粘进 HTML 的 &lt;img src&gt;</label>
-        <input type="file" id="aImgs" accept="image/*" multiple>
-        <div class="links hide" id="aLinks"></div>
         <label>正文 HTML（可直接选 .html 文件）</label>
         <input type="file" id="aFile" accept=".html,.htm,text/html">
         <textarea class="code" id="aHtml" placeholder="<p>正文…</p>"></textarea>
@@ -136,29 +130,20 @@ async function loadFeed(){
 }
 
 /* ---------- articles ---------- */
-let aCover='';
-$('#aCover').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-  $('#aMsg').textContent='封面上传中…';
-  try{aCover=await up('article',f);$('#aCoverImg').src=aCover;$('#aCoverImg').classList.remove('hide');$('#aMsg').textContent=''}
-  catch(err){$('#aMsg').textContent='上传失败：'+err.message}};
-$('#aImgs').onchange=async e=>{const files=[...e.target.files];e.target.value='';
-  $('#aMsg').textContent='图片上传中…';const box=$('#aLinks');box.classList.remove('hide');
-  try{for(const f of files){const u=await up('article',f);box.insertAdjacentHTML('beforeend',`<div><span>${u}</span><button data-copy="${u}">复制</button></div>`)}$('#aMsg').textContent=''}
-  catch(err){$('#aMsg').textContent='上传失败：'+err.message}};
 $('#aFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)$('#aHtml').value=await f.text()};
 $('#aPost').onclick=async()=>{
   const title=$('#aTitle').value,html=$('#aHtml').value;
   if(!title.trim()||!html.trim()){$('#aMsg').textContent='标题和正文都要有';return}
   $('#aPost').disabled=true;
-  try{await api('/api/articles',{method:'POST',body:JSON.stringify({title,cover:aCover,html})});
-    $('#aTitle').value='';$('#aHtml').value='';aCover='';$('#aCoverImg').classList.add('hide');$('#aLinks').innerHTML='';$('#aLinks').classList.add('hide');
+  try{await api('/api/articles',{method:'POST',body:JSON.stringify({title,html})});
+    $('#aTitle').value='';$('#aHtml').value='';
     $('#aMsg').textContent='已发布';loadArt()}
   catch(e){$('#aMsg').textContent='发布失败：'+e.message}
   $('#aPost').disabled=false;
 };
 async function loadArt(){
   const list=await fetch('/api/articles').then(r=>r.json());
-  $('#aList').innerHTML=list.length?list.map(a=>`<div class="item">${a.cover?`<img src="${a.cover}" alt="">`:''}<div><p><b>${esc(a.title)}</b></p><small>${day(a.created_at)}</small></div><button class="del" data-del="articles/${a.id}">删除</button></div>`).join(''):'<small>还没有长文</small>';
+  $('#aList').innerHTML=list.length?list.map(a=>`<div class="item"><div><p><b>${esc(a.title)}</b></p><small>${day(a.created_at)}</small></div><button class="del" data-del="articles/${a.id}">删除</button></div>`).join(''):'<small>还没有长文</small>';
 }
 
 $('#btnClean').onclick=async()=>{const b=$('#btnClean');if(!confirm('删除所有没被碎片或长文引用、且上传超过 1 小时的图片？'))return;b.disabled=true;
